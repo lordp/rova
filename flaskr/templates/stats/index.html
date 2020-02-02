@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% block title %}{{ span }}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<table class="ui sortable small collapsing compact celled striped table">
+    <thead>
+    <tr>
+        <th>Artist</th>
+        <th>Count</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in stats %}
+    <tr>
+        <td><a href="{{ url_for('artist', name=row[1]) }}">{{ row[0] }}</a></td>
+        <td class="center aligned">{{ row[2] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if prev_url %}
+    <a href="{{ prev_url }}">Prev</a>
+{% endif %}
+{% if next_url %}
+    <a href="{{ next_url }}">Next</a>
+{% endif %}
+{% endblock %}

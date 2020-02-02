@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% block title %}{{ artist }} - {{ span }}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="ui segment">
+    <div class="ui two column very relaxed grid">
+        <div class="column">
+            <table class="ui sortable small collapsing compact celled striped table">
+                <thead>
+                <tr>
+                    <th>Song</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for row in song_stats %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td class="center aligned">{{ row[1] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% if prev_url %}
+                <a href="{{ prev_url }}">Prev</a>
+            {% endif %}
+            {% if next_url %}
+                <a href="{{ next_url }}">Next</a>
+            {% endif %}
+        </div>
+        <div class="column">
+            <canvas id="canvas"></canvas>
+            <table class="ui sortable small collapsing compact celled striped table">
+                <thead>
+                <tr>
+                    <th>Station</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for row in station_stats %}
+                <tr>
+                    <td><a href="{{ url_for('station', name=row[0]) }}">{{ row[0] | station_name }}</a></td>
+                    <td class="center aligned">{{ row[1] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<meta id="hourly_plays" data-plays="{% for row in hourly_plays %}{{ row[1] }},{% endfor %}"></meta>
+<script>
+    var hourly_plays = $('#hourly_plays').data('plays').split(',');
+    var barChartData = {
+        labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+        datasets: [{
+            label: 'Plays',
+            backgroundColor: 'rgba(255, 0, 0, 0.5)',
+            borderColor: 'rgb(255, 0, 0)',
+            borderWidth: 1,
+            data: hourly_plays
+        }]
+
+    };
+
+    window.onload = function() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+        window.myBar = new Chart(ctx, {
+            type: 'bar',
+            data: barChartData,
+            options: {
+                responsive: true,
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Plays per hour'
+                },
+                tooltips: {
+                    callbacks: {
+                        title: function(tooltipItem) {
+                            var hour = tooltipItem[0].label;
+                            var am_pm = hour >= 12 ? 'pm' : 'am';
+                            hour = (hour % 12) || 12;
+
+                            return hour + am_pm;
+                        },
+
+                        label: function(tooltipItem, data) {
+                            var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += Math.round(tooltipItem.yLabel * 100) / 100;
+                            return label;
+                        }
+                    }
+                }
+            }
+        });
+
+    };
+
+</script>
+
+{% endblock %}
