@@ -13,6 +13,9 @@ def index():
         group_by(Played.artist).\
         order_by(db.func.count(Played.artist).desc())
 
+    recent_songs = db.session.query(Played.artist, Played.artist_slug, Played.name, Played.station, Played.played_time).\
+        order_by(Played.played_time.desc())[:15]
+
     t = request.args.get('t')
     start_date, end_date, span = parse_time(t)
     if start_date:
@@ -27,6 +30,7 @@ def index():
     return render_template(
         'stats/index.html',
         stats=stats.items,
+        recent_songs=recent_songs,
         span=span,
         next_url=next_url,
         prev_url=prev_url
