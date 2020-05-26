@@ -9,12 +9,14 @@
     <!-- Site Properties -->
     <title>Rova Music Stats - {% block title %}{% endblock %}</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='semantic.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='chart.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/semantic.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chart.min.css') }}">
 
-    <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='semantic.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='chart.min.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/semantic.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/slug.js') }}"></script>
 </head>
 <body>
 <div class="ui container">
