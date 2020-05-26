@@ -51,9 +51,13 @@ def artist(name):
         group_by(Played.station).\
         order_by(db.func.count(Played.station).desc())
 
-    hourly_plays = db.session.query(db.func.strftime("%H", Played.played_time), db.func.count()).\
+    hourly_plays = db.session.query(db.func.strftime("%H", Played.played_time).lavel("hour"), db.func.count()).\
         filter(Played.artist_slug == name).\
-        group_by(db.func.strftime("%H", Played.played_time))
+        group_by("hour")
+
+    daily_plays = db.session.query(db.func.strftime("%w", Played.played_time).label("day"), db.func.count()).\
+        filter(Played.artist_slug == name).\
+        group_by("day")
 
     start_date, end_date, span = parse_time(request.args.get('t'))
     if start_date:
@@ -74,6 +78,7 @@ def artist(name):
         artist=artist[0],
         span=span,
         hourly_plays=hourly_plays,
+        daily_plays=daily_plays,
         next_url=next_url,
         prev_url=prev_url
     )
@@ -86,9 +91,15 @@ def station(name):
         group_by(Played.artist, Played.name).\
         order_by(db.func.count(Played.artist).desc())
 
+    total_plays = db.session.query(db.func.count()).filter(Played.station == name)
+
     hourly_plays = db.session.query(db.func.strftime("%H", Played.played_time).label("hour"), db.func.count()).\
         filter(Played.station == name).\
         group_by("hour")
+
+    daily_plays = db.session.query(db.func.strftime("%w", Played.played_time).label("day"), db.func.count()).\
+        filter(Played.station == name).\
+        group_by("day")
 
     average_songs_per_day = db.session.query(db.func.strftime("%Y-%m-%d", Played.played_time).label("day"), db.func.count()).\
         filter(Played.station == name).\
@@ -101,7 +112,9 @@ def station(name):
     start_date, end_date, span = parse_time(t)
     if start_date:
         stats = stats.filter(Played.played_time >= start_date, Played.played_time < end_date)
+        total_plays = total_plays.filter(Played.played_time >= start_date, Played.played_time < end_date)
         hourly_plays = hourly_plays.filter(Played.played_time >= start_date, Played.played_time < end_date)
+        daily_plays = daily_plays.filter(Played.played_time >= start_date, Played.played_time < end_date)
         average_songs_per_day = average_songs_per_day.filter(Played.played_time >= start_date, Played.played_time < end_date)
 
         total_song_length = total_song_length.filter(Played.played_time >= start_date, Played.played_time < end_date)
@@ -148,12 +161,14 @@ def station(name):
         next_url=next_url,
         prev_url=prev_url,
         hourly_plays=hourly_plays,
+        daily_plays=daily_plays,
         song_stats={
             "average": songs_average,
             "max": songs_max,
             "max_day": songs_max_day,
             "min": songs_min,
             "min_day": songs_min_day,
-            "song_percent": song_percent
+            "song_percent": song_percent,
+            "total": total_plays.first()[0]
         }
     )
