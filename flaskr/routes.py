@@ -51,7 +51,7 @@ def index():
 def artist(name):
     artist = db.session.query(Played.artist).filter(Played.artist_slug == name).first()
 
-    song_stats = db.session.query(Played.name, db.func.count(Played.name)).\
+    song_stats = db.session.query(Played.name, Played.song_slug, db.func.count(Played.name)).\
         filter(Played.artist_slug == name).\
         group_by(Played.name).\
         order_by(db.func.count(Played.name).desc())
