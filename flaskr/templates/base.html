@@ -1,168 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Standard Meta -->
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta http-equiv="Content-Language" content="en" />
+    <meta name="msapplication-TileColor" content="#2d89ef" />
+    <meta name="theme-color" content="#4188c9" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
 
-    <!-- Site Properties -->
-    <title>Rova Music Stats - {% block title %}{% endblock %}</title>
+    <title>Rova Music Tracker{% block title %}{% endblock %}</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/semantic.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/chart.min.css') }}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300i,400,400i,500,500i,600,600i,700,700i&amp;subset=latin-ext" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/c3.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/select2.min.css') }}">
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-
-    <script src="{{ url_for('static', filename='js/semantic.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/slug.js') }}"></script>
+    <script src="https://d3js.org/d3.v5.js"></script>
+    <script src="{{ url_for('static', filename='js/c3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/select2.min.js') }}"></script>
 
-    <script>
-        $(function() {
-            $("#song-search").select2({
-                ajax: {
-                    data: function (params) {
-                        var query = {
-                            term: params.term,
-                            type: 'song'
-                        }
-
-                        return query;
-                    },
-                    url: '/search',
-                    dataType: 'json',
-                    delay: 250,
-                },
-                placeholder: 'Search for a song',
-                minimumInputLength: 3,
-                width: "50%"
-            });
-
-            $("#artist-search").select2({
-                ajax: {
-                    data: function (params) {
-                        var query = {
-                            term: params.term,
-                            type: 'artist'
-                        }
-
-                        return query;
-                    },
-                    url: '/search',
-                    dataType: 'json',
-                    delay: 250,
-                },
-                placeholder: 'Search for an artist',
-                minimumInputLength: 3,
-                width: "50%"
-            });
-        });
-    </script>
-</head>
-<body>
-<div class="ui container" style="margin-top: 5px;">
-    <h1>
-        <a href="/">Rova Music Stats</a> - {% block header %}{% endblock %}
-    </h1>
-    {% for message in get_flashed_messages() %}
-        <div class="flash">{{ message }}</div>
-    {% endfor %}
-    <div class="ui horizontal list">
-        <div class="item">
-            <div class="content">
-                <strong>Stations:</strong>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
+  </head>
+  <body class="">
+    <div class="page">
+      <div class="flex-fill">
+        <div class="header py-4">
+          <div class="container">
+            <div class="d-flex">
+              <a class="header-brand" href="/">
+                Rova Music Tracker
+              </a>
             </div>
+          </div>
         </div>
-        <div class="item">
-            <div class="content">
-                <a href="{{ url_for('station', name='breeze') }}">The Breeze</a>
+        <div class="header collapse d-lg-flex p-0" id="headerMenuCollapse">
+          <div class="container">
+            <div class="row align-items-center">
+              <div class="col-lg-3 ml-auto">
+                <form class="input-icon my-3 my-lg-0">
+                  <select id="search"></select>
+                </form>
+              </div>
+              <div class="col-lg order-lg-first">
+                <ul class="nav nav-tabs border-0 flex-column flex-lg-row">
+                  <li class="nav-item">
+                    <a href="/" class="nav-link{% if request.path == '/' %} active{% endif %}">Home</a>
+                  </li>
+                  {% for tag, name in station_list.items() %}
+                  <li class="nav-item">
+                    <a href="{{ url_for('station', name=tag) }}" class="nav-link{% if request.path == '/station/' + tag %} active{% endif %}">{{ name }}</a>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
             </div>
+          </div>
         </div>
-        <div class="item">
-            <div class="content">
-                <a href="{{ url_for('station', name='edge') }}">The Edge</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="{{ url_for('station', name='george') }}">George FM</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="{{ url_for('station', name='magic') }}">Magic Music</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="{{ url_for('station', name='mai') }}">Mai FM</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="{{ url_for('station', name='more') }}">More FM</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="{{ url_for('station', name='rock') }}">The Rock</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="{{ url_for('station', name='sound') }}">The Sound</a>
-            </div>
-        </div>
+        {% block content %}{% endblock %}
+      </div>
     </div>
-    <div class="ui clearing divider"></div>
-    <div class="ui horizontal list">
-        <div class="item">
-            <div class="content">
-                <strong>Time span:</strong>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="?t=today">Today</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="?t=yesterday">Yesterday</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="?t=this_week">This Week</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="?t=last_week">Last Week</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="?t=this_month">This Month</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="?t=last_month">Last Month</a>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <a href="{{ request.path }}">All time</a>
-            </div>
-        </div>
-    </div>
-    <div class="ui clearing divider"></div>
-    <div><select id="song-search"></select><select id="artist-search"></select></div>
-    {% block content %}{% endblock %}
-</div>
-</body>
+  </body>
 </html>

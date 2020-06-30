@@ -1,140 +1,125 @@
 {% extends 'base.html' %}
 
 {% block header %}
-{% block title %}{{ station | station_name }} - {{ span }}{% endblock %}
+{% block title %} - {{ station | station_name }}{% endblock %}
 {% endblock %}
 
 {% block content %}
-<div class="ui segment">
-    <div class="ui two column very relaxed grid">
-        <div class="column">
-            <table class="ui sortable small collapsing compact celled striped table">
-                <thead>
+<div class="my-3 my-md-5">
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">
+        {{ station | station_name }}
+      </h1>
+    </div>
+    <div class="row row-cards">
+      <div class="col-6 col-sm-4 col-lg-2">
+        <div class="card">
+          <div class="card-body p-3 text-center">
+            <div class="h1 m-0">{{ stats.total_plays }}</div>
+            <div class="text-muted mb-4">Total Plays</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-lg-2">
+        <div class="card">
+          <div class="card-body p-3 text-center">
+            <div class="h1 m-0">{{ stats.unique_songs }}</div>
+            <div class="text-muted mb-4">Unique Songs</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-lg-2">
+        <div class="card">
+          <div class="card-body p-3 text-center">
+            <div class="h1 m-0">{{ stats.unique_artists }}</div>
+            <div class="text-muted mb-4">Unique Artists</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-lg-2">
+        <div class="card">
+          <div class="card-body p-3 text-center">
+            <div class="h1 m-0">{{ stats.last_day }}</div>
+            <div class="text-muted mb-4">Plays in 24 hours</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-lg-2">
+        <div class="card">
+          <div class="card-body p-3 text-center">
+            <div class="h1 m-0">{{ stats.last_week }}</div>
+            <div class="text-muted mb-4">Plays in 7 days</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-lg-2">
+        <div class="card">
+          <div class="card-body p-3 text-center">
+            <div class="h1 m-0">{{ stats.last_month }}</div>
+            <div class="text-muted mb-4">Plays in 30 days</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Daily Plays (last 30 days)</h3>
+          </div>
+          <div id="chart-daily-plays"></div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Hourly Plays</h3>
+          </div>
+          <div id="chart-hourly-plays"></div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Music Ratio</h3>
+          </div>
+          <div id="chart-music-ratio"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row row-cards row-deck">
+      <div class="col-12">
+        <div class="card">
+          <div class="table-responsive">
+            <table class="table table-hover table-outline table-vcenter text-nowrap card-table">
+              <thead>
                 <tr>
-                    <th>Song</th>
-                    <th>Artist</th>
-                    <th>Count</th>
+                  <th>Song</th>
+                  <th>Artist</th>
+                  <th>When</th>
                 </tr>
-                </thead>
-                <tbody>
-                {% for row in stats %}
+              </thead>
+              <tbody>
+                {% for row in recent_songs %}
                 <tr>
-                    <td>{{ row[2] }}</td>
-                    <td><a href="{{ url_for('artist', name=row[1]) }}">{{ row[0] }}</a></td>
-                    <td class="center aligned">{{ row[3] }}</td>
+                  <td>
+                    <a href="{{ url_for('song', name=row.song.slug) }}">{{ row.song.name }}</a>
+                  </td>
+                  <td>
+                    <a href="{{ url_for('artist', name=row.artist.slug) }}">{{ row.artist.name }}</a>
+                  </td>
+                  <td>{{ row.played_time | delta }}</td>
                 </tr>
                 {% endfor %}
-                </tbody>
+              </tbody>
             </table>
-            {% if prev_url %}
-                <a href="{{ prev_url }}">Prev</a>
-            {% endif %}
-            {% if next_url %}
-                <a href="{{ next_url }}">Next</a>
-            {% endif %}
+          </div>
         </div>
-        <div class="column">
-            <canvas id="canvas"></canvas>
-            <h4>Stats!</h4>
-            <table class="ui sortable small collapsing compact celled striped table">
-                <tbody>
-                    <tr>
-                        <td>Average songs played per day</td>
-                        <td>{{ song_stats.average }}</td>
-                        {% if song_stats.song_percent %}
-                        <td rowspan="3">
-                            <canvas id="pie"></canvas>
-                        </td>
-                        {% endif %}
-                        </tr>
-                    <tr>
-                        <td>Most songs played</td>
-                        <td>{{ song_stats.max }}<br/>{{ song_stats.max_day }}</td>
-                    </tr>
-                    <tr>
-                        <td>Least songs played</td>
-                        <td>{{ song_stats.min }}<br/>{{ song_stats.min_day }}</td>
-                    </tr>
-                    <tr>
-                        <td>Total songs played</td>
-                        <td>{{ song_stats.total }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+      </div>
     </div>
+  </div>
 </div>
 
-<meta id="hourly_plays" data-plays="{% for row in hourly_plays %}{{ row[1] }},{% endfor %}"></meta>
-<meta id="song_percent" data-value="{{ song_stats['song_percent'] }}"></meta>
-<script>
-    var hourly_plays = $('#hourly_plays').data('plays').split(',');
-    var barChartData = {
-        labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
-        datasets: [{
-            label: 'Plays',
-            backgroundColor: 'rgba(255, 0, 0, 0.5)',
-            borderColor: 'rgb(255, 0, 0)',
-            borderWidth: 1,
-            data: hourly_plays
-        }]
-
-    };
-
-    window.onload = function() {
-        var ctx = document.getElementById('canvas').getContext('2d');
-        window.myBar = new Chart(ctx, {
-            type: 'bar',
-            data: barChartData,
-            options: {
-                responsive: true,
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'Plays per hour'
-                },
-                tooltips: {
-                    callbacks: {
-                        title: function(tooltipItem) {
-                            var hour = tooltipItem[0].label;
-                            var am_pm = hour >= 12 ? 'pm' : 'am';
-                            hour = (hour % 12) || 12;
-
-                            return hour + am_pm;
-                        },
-
-                        label: function(tooltipItem, data) {
-                            var label = data.datasets[tooltipItem.datasetIndex].label || '';
-
-                            if (label) {
-                                label += ': ';
-                            }
-                            label += Math.round(tooltipItem.yLabel * 100) / 100;
-                            return label;
-                        }
-                    }
-                }
-            }
-        });
-
-        var song_percent = $('#song_percent').data('value');
-        var ctx = document.getElementById('pie').getContext('2d');
-        window.myPie = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                datasets: [{
-                    data: [song_percent, (100 - song_percent).toFixed(2)],
-                    backgroundColor: ["rgb(255, 0, 0)", "rgb(0, 0, 255)"]
-                }],
-                labels: ["Music", "Other"]
-            }
-        });
-
-
-    };
-
-</script>
-
+<meta id="daily_plays" data-plays="{{ stats.daily_plays | extract_values }}" data-labels="{{ stats.daily_plays | extract_labels }}"/>
+<meta id="hourly_plays" data-plays="{{ stats.hourly_plays | extract_values }}" data-labels="{{ stats.hourly_plays | extract_labels }}"/>
+<meta id="music_ratio" data-music="{{ stats.music_ratio.music }}" data-other="{{ stats.music_ratio.other }}"/>
 {% endblock %}
