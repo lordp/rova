@@ -2,6 +2,8 @@ import requests
 import json
 import re
 from datetime import datetime
+import sys
+
 from slugify import slugify
 
 from flaskr import db
@@ -21,7 +23,11 @@ urls = {
 
 counter = 0
 
-played_old = db.session.execute("select * from played_old")
+query = "select * from played_old"
+if len(sys.argv) > 1:
+    query = f"{query} where id > {sys.argv[1]}"
+
+played_old = db.session.execute(query)
 for record in played_old:
     artist_name = record[3]
     artist_slug = slugify(artist_name)
@@ -55,6 +61,6 @@ for record in played_old:
     if counter % 100 == 0:
         print(".", end="", flush=True)
     if counter % 1000 == 0:
-        print(counter, flush=True)
+        print(f" {counter} [{datetime.now()}]", flush=True)
 
     counter += 1
