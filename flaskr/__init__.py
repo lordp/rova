@@ -6,12 +6,13 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-from .util import SlugConverter, stations, format_time
+from .util import SlugConverter, stations, format_time, page_not_found
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
 app.url_map.converters['slug'] = SlugConverter
+app.register_error_handler(404, page_not_found)
 
 db = SQLAlchemy(app)
 db.init_app(app)

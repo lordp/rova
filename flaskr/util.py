@@ -2,6 +2,7 @@ from slugify import slugify
 from werkzeug.routing import BaseConverter
 from datetime import datetime, timedelta
 import math
+from flask import render_template
 
 from dateutil.utils import today
 from dateutil.relativedelta import relativedelta
@@ -82,3 +83,8 @@ def format_time(seconds):
         return '{m:0.0f} mins {s} secs'.format(m=minute, s=second)
     else:
         return '{s} secs'.format(s=second)
+
+
+def page_not_found(e):
+    # note that we set the 404 status explicitly
+    return render_template('404.html', error=e, station_list=stations()), 404

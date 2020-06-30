@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %} - Page Not Found{% endblock %}
+{% block content %}
+<div class="my-3 my-md-5">
+    <div class="container">
+      <div class="page-header">
+        <h1 class="page-title">
+          Not found!
+        </h1>
+      </div>
+      <div>
+          We're sorry, that {{ error.description }} cannot be found.
+      </div>
+    </div>
+</div>
+{% endblock %}

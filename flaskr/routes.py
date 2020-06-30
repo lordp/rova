@@ -2,7 +2,7 @@ from flaskr import app, db, stations
 from flaskr.models import Played, Artist, Song
 from flaskr.util import parse_time, stations
 
-from flask import render_template, request, url_for, Response
+from flask import render_template, request, url_for, Response, abort
 
 from sqlalchemy.sql.expression import desc
 
@@ -66,6 +66,8 @@ def index():
 @app.route("/artist/<slug:name>")
 def artist(name):
     artist = db.session.query(Artist).filter(Artist.slug == name).first()
+    if not artist:
+        abort(404, 'artist')
 
     recent_songs = db.session.query(Played).join(Song, Artist).filter(Played.artist_id == artist.id).order_by(Played.played_time.desc()).limit(15)
 
@@ -126,6 +128,10 @@ def artist(name):
 
 @app.route("/station/<slug:name>")
 def station(name):
+    station_list = stations()
+    if name not in station_list:
+        abort(404, 'station')
+
     recent_songs = db.session.query(Played).join(Song, Artist).\
         filter(Played.station == name).\
         order_by(Played.played_time.desc())[:15]
@@ -175,7 +181,7 @@ def station(name):
         station=name,
         stats=stats,
         recent_songs=recent_songs,
-        station_list=stations()
+        station_list=station_list
     )
 
 
@@ -219,6 +225,8 @@ def has_no_empty_params(rule):
 @app.route("/song/<slug:name>/artist/<slug:artist>")
 def song(name, artist=None):
     song = db.session.query(Song).filter(Song.slug == name).first()
+    if not song:
+        abort(404, 'song')
 
     if artist:
         artists = [db.session.query(Artist).filter(Artist.slug == artist).first()]
