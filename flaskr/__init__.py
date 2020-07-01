@@ -21,7 +21,9 @@ migrate = Migrate(app, db)
 
 from flaskr import models, routes
 from datetime import timedelta, datetime
+import pytz
 
+TZ = pytz.timezone('Pacific/Auckland')
 
 @app.template_filter()
 def station_name(name):
@@ -45,7 +47,7 @@ def weekday(dow):
 
 @app.template_filter()
 def delta(value):
-    diff = datetime.now() - value
+    diff = datetime.now().astimezone(TZ) - value.astimezone(TZ)
     return f"{format_time(diff.total_seconds())} ago"
 
 

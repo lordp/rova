@@ -4,3 +4,4 @@ Flask==1.1.2
 Flask-Migrate==2.5.3
 python-slugify==4.0.0
 requests==2.24.0
+pytz==2020.1
