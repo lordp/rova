@@ -44,8 +44,8 @@ def weekday(dow):
 
 
 @app.template_filter()
-def delta(value):
-    diff = datetime.now() - value
+def delta(value, current_time):
+    diff = current_time - value
     return f"{format_time(diff.total_seconds())} ago"
 
 

@@ -99,7 +99,7 @@
                   <td>
                     <a href="{{ url_for('station', name=row.station) }}">{{ row.station | station_name }}</a>
                   </td>
-                  <td><span title="{{ row.played_time }}">{{ row.played_time | delta }}</span></td>
+                  <td><span title="{{ row.played_time }}">{{ row.played_time | delta(current_time) }}</span></td>
                 </tr>
                 {% endfor %}
               </tbody>

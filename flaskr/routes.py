@@ -57,6 +57,7 @@ def index():
 
     return render_template(
         'stats/index.html',
+        current_time=datetime.now(),
         stats=stats,
         recent_songs=recent_songs,
         station_list=stations()
