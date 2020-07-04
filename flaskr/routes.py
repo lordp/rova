@@ -67,7 +67,7 @@ def index():
 def artist(name):
     artist = db.session.query(Artist).filter(Artist.slug == name).first()
     if not artist:
-        abort(404, 'artist')
+        abort(404, "We're sorry, that artist cannot be found.")
 
     recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).filter(Played.artist_id == artist.id).order_by(Played.played_time.desc()).limit(15)
 
@@ -130,7 +130,7 @@ def artist(name):
 def station(name):
     station_list = stations()
     if name not in station_list:
-        abort(404, 'station')
+        abort(404, "We're sorry, that station cannot be found.")
 
     recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).\
         filter(Played.station == name).\
@@ -226,7 +226,7 @@ def has_no_empty_params(rule):
 def song(name, artist=None):
     song = db.session.query(Song).filter(Song.slug == name).first()
     if not song:
-        abort(404, 'song')
+        abort(404, "We're sorry, that song cannot be found.")
 
     if artist:
         artists = [db.session.query(Artist).filter(Artist.slug == artist).first()]
