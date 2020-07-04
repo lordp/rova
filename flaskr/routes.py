@@ -19,7 +19,7 @@ def find_start_date():
 
 @app.route("/")
 def index():
-    recent_songs = db.session.query(Played).join(Song).join(Artist).order_by(Played.played_time.desc()).limit(15).distinct()
+    recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).order_by(Played.played_time.desc()).limit(15).distinct()
 
     total_plays = db.session.query(Played).count()
     unique_songs = db.session.query(Song.name).join(Played).distinct().count()
@@ -69,7 +69,7 @@ def artist(name):
     if not artist:
         abort(404, 'artist')
 
-    recent_songs = db.session.query(Played).join(Song, Artist).filter(Played.artist_id == artist.id).order_by(Played.played_time.desc()).limit(15)
+    recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).filter(Played.artist_id == artist.id).order_by(Played.played_time.desc()).limit(15)
 
     total_plays = db.session.query(Played).join(Artist).filter(Played.artist_id == artist.id).count()
     unique_songs = db.session.query(Song.name).join(Played, Artist).filter(Song.artist_id == artist.id).distinct().count()
@@ -100,7 +100,7 @@ def artist(name):
         order_by(desc('cnt'))
 
     station_play_count = db.session.query(Played.station, db.func.count(Song.slug).label('cnt')).\
-        join(Song, Artist).\
+        join(Song).join(Artist, Artist.id == Played.artist_id).\
         filter(Artist.id == artist.id).\
         group_by(Played.station).\
         order_by(desc('cnt'))
@@ -132,7 +132,7 @@ def station(name):
     if name not in station_list:
         abort(404, 'station')
 
-    recent_songs = db.session.query(Played).join(Song, Artist).\
+    recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).\
         filter(Played.station == name).\
         order_by(Played.played_time.desc())[:15]
 
