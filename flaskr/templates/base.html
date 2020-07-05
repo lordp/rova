@@ -25,6 +25,7 @@
     <script src="https://d3js.org/d3.v5.js"></script>
     <script src="{{ url_for('static', filename='js/c3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/select2.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
     <script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
@@ -37,6 +38,10 @@
             <div class="d-flex">
               <a class="header-brand" href="/">
                 Rova Music Tracker
+              </a>
+              <div class="d-flex order-lg-2 ml-auto"></div>
+              <a href="#" class="header-toggler d-lg-none ml-3 ml-lg-0 collapsed" data-toggle="collapse" data-target="#headerMenuCollapse" aria-expanded="false">
+                <span class="header-toggler-icon"></span>
               </a>
             </div>
           </div>
