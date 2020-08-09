@@ -8,6 +8,8 @@ from flask_migrate import Migrate
 
 from .util import SlugConverter, stations, format_time, page_not_found
 
+from jinja2 import Markup
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -66,3 +68,20 @@ def extract_labels(array):
 @app.template_filter()
 def extract_values(array):
     return ",".join([str(int(value)) for _, value in array])
+
+
+@app.template_filter()
+def change_colour(change):
+    if change is None:
+        change = "new"
+        change_class = "chart-new-entry"
+    elif change == 0:
+        change = "="
+        change_class = "chart-no-change"
+    elif change < 0:
+        change_class = "chart-neg-change"
+    elif change > 0:
+        change = f"+{change}"
+        change_class = "chart-pos-change"
+
+    return Markup(f"<span class=\"{change_class}\">{change}</span>")

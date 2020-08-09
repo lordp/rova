@@ -1,5 +1,5 @@
 from flaskr import app, db, stations
-from flaskr.models import Played, Artist, Song
+from flaskr.models import Played, Artist, Song, Chart
 from flaskr.util import parse_time, stations
 
 from flask import render_template, request, url_for, Response, abort
@@ -303,5 +303,31 @@ def song(name, artist=None):
         station_stats=station_stats,
         stats=stats,
         recent_plays=recent_plays,
+        station_list=stations()
+    )
+
+
+@app.route("/chart/<int:year>/<int:month>/<int:day>")
+@app.route("/chart/<int:year>/<int:month>/<int:day>/<slug:station>")
+def chart(year, month, day, station=None):
+    date = datetime(year, month, day)
+    if date.isoweekday() > 1:
+        date = date - timedelta(days=date.isoweekday() - 1)
+        return redirect(f"/chart/{date.year}/{date.month:02d}/{date.day:02d}", code=302)
+
+    year, week, _ = date.isocalendar()
+    chart = db.session.query(Chart).join(Song).join(Artist, Artist.id == Chart.artist_id).filter(Chart.year == year, Chart.week == week).order_by(Chart.position)
+    if station:
+        chart = chart.filter(Chart.station == station)
+    else:
+        chart = chart.filter(Chart.station == None)
+    print(chart)
+
+    return render_template(
+        'stats/chart.html',
+        chart=chart,
+        year=year,
+        week=week,
+        station=station,
         station_list=stations()
     )

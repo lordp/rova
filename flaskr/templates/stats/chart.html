@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% block title %} - Chart for week #{{ week }} of {{ year }}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var path = location.pathname.split('/');
+        var path_date = moment(path[2] + '-' + path[3] + '-' + path[4]);
+
+        $(".btn[data-calendar-nav='prev']").on("click", function() {
+            path_date = path_date.subtract(7, 'days');
+            location.href = "/chart/" + path_date.format('YYYY/MM/DD');
+        });
+        $(".btn[data-calendar-nav='current']").on("click", function() {
+            location.href = "/chart/" + path_date.format('YYYY/MM/DD');
+        });
+        $(".btn[data-calendar-nav='next']").on("click", function() {
+            path_date = path_date.add(7, 'days');
+            location.href = "/chart/" + path_date.format('YYYY/MM/DD');
+        });
+    });
+</script>
+<div class="my-3 my-md-5">
+  <div class="container">
+    <div class="">
+      <div class="btn-group float-right">
+        <button class="btn btn-primary" data-calendar-nav="prev"><< Prev</button>
+        <button class="btn" data-calendar-nav="current">Current Week</button>
+        <button class="btn btn-primary" data-calendar-nav="next">Next >></button>
+      </div>
+      <h1 class="page-title">
+        Chart for week #{{ week }} of {{ year }}
+      </h1>
+    </div>
+    <div class="row row-cards row-deck">
+      <div class="col-12">
+        <div class="card">
+          <div class="table-responsive">
+            <table class="table table-hover table-outline table-vcenter text-nowrap card-table">
+              <thead>
+                <tr>
+                  <th>Position</th>
+                  <th>Change</th>
+                  <th>Artist</th>
+                  <th>Song</th>
+                  <th>Play Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in chart %}
+                <tr>
+                  <td>{{ row.position }}</td>
+                  <td>{{ row.change | change_colour }}</td>
+                  <td>
+                    <a href="{{ url_for('artist', name=row.artist.slug) }}">{{ row.artist.name }}</a>
+                  </td>
+                  <td>
+                    <a href="{{ url_for('song', name=row.song.slug, artist=row.artist.slug) }}">{{ row.song.name }}</a>
+                  </td>
+                  <td>{{ row.play_count }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

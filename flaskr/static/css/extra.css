@@ -1,0 +1,19 @@
+.chart-new-entry {
+    color: green;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.chart-no-change {
+    font-weight: bold;
+}
+
+.chart-neg-change {
+    color: red;
+    font-weight: bold;
+}
+
+.chart-pos-change {
+    color: green;
+    font-weight: bold;
+}
