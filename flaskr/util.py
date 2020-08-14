@@ -6,6 +6,7 @@ from flask import render_template
 
 from dateutil.utils import today
 from dateutil.relativedelta import relativedelta
+import pytz
 
 
 class SlugConverter(BaseConverter):
@@ -16,7 +17,7 @@ class SlugConverter(BaseConverter):
 def parse_time(span):
     dates = (None, None)
     dt = datetime.today()
-    now = datetime.now()
+    now = datetime.now().astimezone(tz())
 
     if span == "today":
         dates = (today(), today() + timedelta(days=1) - timedelta(seconds=1))
@@ -88,3 +89,7 @@ def format_time(seconds):
 def page_not_found(e):
     # note that we set the 404 status explicitly
     return render_template('404.html', error=e, station_list=stations()), 404
+
+
+def tz():
+    return pytz.timezone('Pacific/Auckland')

@@ -1,6 +1,6 @@
-from flaskr import app, db, stations
+from flaskr import app, db
 from flaskr.models import Played, Artist, Song, Chart
-from flaskr.util import parse_time, stations
+from flaskr.util import parse_time, stations, tz
 
 from flask import render_template, request, url_for, Response, abort, redirect
 
@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 
 def find_start_date():
     start_date = db.session.query(Played.played_time).order_by(Played.played_time)[0]
-    return (start_date[0], datetime.now().replace(microsecond=0))
+    return (start_date[0], datetime.now().replace(microsecond=0).astimezone(tz))
 
 
 @app.route("/")

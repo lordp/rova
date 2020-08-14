@@ -6,7 +6,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-from .util import SlugConverter, stations, format_time, page_not_found
+from .util import SlugConverter, stations, format_time, page_not_found, tz
 
 from jinja2 import Markup
 
@@ -25,7 +25,6 @@ from flaskr import models, routes
 from datetime import timedelta, datetime
 import pytz
 
-TZ = pytz.timezone('Pacific/Auckland')
 
 @app.template_filter()
 def station_name(name):
@@ -49,7 +48,7 @@ def weekday(dow):
 
 @app.template_filter()
 def delta(value):
-    diff = datetime.now().astimezone(TZ) - TZ.localize(value)
+    diff = datetime.now().astimezone(tz()) - value.replace(tzinfo=tz())
     return f"{format_time(diff.total_seconds())} ago"
 
 
