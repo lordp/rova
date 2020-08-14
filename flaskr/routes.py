@@ -42,7 +42,7 @@ def index():
 
     daily_plays = db.session.query(db.func.to_char(Played.played_time, 'YYYY-MM-DD').label("day"), db.func.count()).\
         filter(Played.played_time >= last_month_span[0].replace(hour=0, minute=0, second=0, microsecond=0), Played.played_time < last_month_span[1]).\
-        group_by("day").all()
+        group_by("day").order_by("day").all()
 
     stats = {
         "total_plays": f"{total_plays:,d}",
@@ -91,7 +91,7 @@ def artist(name):
 
     daily_plays = db.session.query(db.func.to_char(Played.played_time, 'YYYY-MM-DD').label("day"), db.func.count()).join(Artist).\
         filter(Played.artist_id == artist.id, Played.played_time >= last_month_span[0].replace(hour=0, minute=0, second=0, microsecond=0), Played.played_time < last_month_span[1]).\
-        group_by("day")
+        group_by("day").order_by("day")
 
     song_play_count = db.session.query(Song, db.func.count(Song.slug).label('cnt')).\
         join(Played, Artist).\
@@ -157,7 +157,7 @@ def station(name):
 
     daily_plays = db.session.query(db.func.to_char(Played.played_time, "YYYY-MM-DD").label("day"), db.func.count()).\
         filter(Played.played_time >= last_month_span[0].replace(hour=0, minute=0, second=0, microsecond=0), Played.played_time < last_month_span[1], Played.station == name).\
-        group_by("day")
+        group_by("day").order_by("day")
 
     start_date, end_date = find_start_date()
     total_song_length = db.session.query(db.func.sum(Song.length).label("total_length")).join(Played).filter(Played.station == name).first()[0]
@@ -262,7 +262,7 @@ def song(name, artist=None):
     daily_plays = db.session.query(db.func.to_char(Played.played_time, "YYYY-MM-DD").label("day"), db.func.count()).\
         join(Song).\
         filter(Played.played_time >= last_month_span[0], Played.played_time < last_month_span[1], Song.slug == name).\
-        group_by("day")
+        group_by("day").order_by("day")
 
     if artist:
         recent_plays = recent_plays.filter(Played.artist_id == artist.id)
