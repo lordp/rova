@@ -10,13 +10,14 @@
     $(document).ready(function() {
         var path = location.pathname.split('/');
         var path_date = moment(path[2] + '-' + path[3] + '-' + path[4]);
+        var current_week = moment(moment().year() + "-" + moment().isoWeek(), 'GGGG-WW');
 
         $(".btn[data-calendar-nav='prev']").on("click", function() {
             path_date = path_date.subtract(7, 'days');
             location.href = "/chart/" + path_date.format('YYYY/MM/DD');
         });
         $(".btn[data-calendar-nav='current']").on("click", function() {
-            location.href = "/chart/" + path_date.format('YYYY/MM/DD');
+            location.href = "/chart/" + current_week.format('YYYY/MM/DD');
         });
         $(".btn[data-calendar-nav='next']").on("click", function() {
             path_date = path_date.add(7, 'days');
