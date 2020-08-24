@@ -307,9 +307,16 @@ def song(name, artist=None):
     )
 
 
+@app.route("/chart/")
 @app.route("/chart/<int:year>/<int:month>/<int:day>")
 @app.route("/chart/<int:year>/<int:month>/<int:day>/<slug:station>")
-def chart(year, month, day, station=None):
+def chart(year=None, month=None, day=None, station=None):
+    if not year:
+        today = datetime.today()
+        year = today.year
+        month = today.month
+        day = today.day
+
     date = datetime(year, month, day)
     if date.isoweekday() > 1:
         date = date - timedelta(days=date.isoweekday() - 1)
@@ -321,7 +328,6 @@ def chart(year, month, day, station=None):
         chart = chart.filter(Chart.station == station)
     else:
         chart = chart.filter(Chart.station == None)
-    print(chart)
 
     return render_template(
         'stats/chart.html',
