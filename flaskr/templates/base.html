@@ -60,6 +60,9 @@
                   <li class="nav-item">
                     <a href="/" class="nav-link{% if request.path == '/' %} active{% endif %}">Home</a>
                   </li>
+                  <li class="nav-item">
+                    <a href="/charts" class="nav-link{% if request.path.startswith('/charts') %} active{% endif %}">Charts</a>
+                  </li>
                   {% for tag, name in station_list.items() %}
                   <li class="nav-item">
                     <a href="{{ url_for('station', name=tag) }}" class="nav-link{% if request.path == '/station/' + tag %} active{% endif %}">{{ name }}</a>
