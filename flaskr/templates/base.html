@@ -61,7 +61,7 @@
                     <a href="/" class="nav-link{% if request.path == '/' %} active{% endif %}">Home</a>
                   </li>
                   <li class="nav-item">
-                    <a href="/charts" class="nav-link{% if request.path.startswith('/charts') %} active{% endif %}">Charts</a>
+                    <a href="/chart/" class="nav-link{% if request.path.startswith('/chart') %} active{% endif %}">Charts</a>
                   </li>
                   {% for tag, name in station_list.items() %}
                   <li class="nav-item">
