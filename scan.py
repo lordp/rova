@@ -3,6 +3,7 @@ import json
 import re
 from datetime import datetime
 from slugify import slugify
+import pytz
 
 from flaskr import db
 from flaskr.models import Artist, Song, Played
@@ -21,6 +22,7 @@ urls = {
 }
 
 pattern = r" ?(\*|\+|\^|NM)$"
+tz = pytz.timezone("Pacific/Auckland")
 
 for station, tag in urls.items():
     req = requests.get(base_url.format(station=tag))
@@ -35,6 +37,7 @@ for station, tag in urls.items():
     artist_slug = slugify(artist_name)
     played_time = f"{j['nowPlaying'][0]['played_date']} {j['nowPlaying'][0]['played_time']}"
     played_time = datetime.strptime(played_time, "%m/%d/%Y %H:%M:%S")
+    played_time = tz.localize(played_time)
     length = j["nowPlaying"][0]["length_in_secs"]
 
     artist = db.session.query(Artist).filter(Artist.name == artist_name).first()
