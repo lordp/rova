@@ -10,6 +10,17 @@ from .util import SlugConverter, stations, format_time, page_not_found, tz
 
 from jinja2 import Markup
 
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+with open('sentry.dsn', 'rb') as infile:
+    sentry_dsn = infile.read().decode("utf-8")
+
+sentry_sdk.init(
+    dsn=sentry_dsn,
+    integrations=[FlaskIntegration()]
+)
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
