@@ -10,7 +10,7 @@ class Played(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), index=True)
     artist = relationship("Artist")
     station = db.Column(db.String(250), nullable=False, index=True)
-    played_time = db.Column(db.DateTime, index=True)
+    played_time = db.Column(db.DateTime(timezone=True), index=True)
 
 
 class Artist(db.Model):
