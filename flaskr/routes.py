@@ -129,7 +129,7 @@ def artist(name):
 @app.route("/station/<slug:name>")
 def station(name):
     station_list = stations()
-    if name not in station_list:
+    if name not in station_list['rova'] and name not in station_list['iheart']:
         abort(404, "We're sorry, that station cannot be found.")
 
     recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).\

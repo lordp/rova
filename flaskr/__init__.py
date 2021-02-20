@@ -39,7 +39,12 @@ import pytz
 
 @app.template_filter()
 def station_name(name):
-    return stations().get(name, name)
+    if name in stations()['rova']:
+        return stations()['rova'][name]
+    elif name in stations()['iheart']:
+        return stations()['iheart'][name]
+    else:
+        return name
 
 
 @app.template_filter()
