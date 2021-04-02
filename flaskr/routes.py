@@ -334,6 +334,7 @@ def chart(year=None, month=None, day=None, station=None):
         chart=chart,
         year=year,
         week=week,
+        full_date=date.strftime("%a, %b %d, %Y"),
         station=station,
         station_list=stations()
     )
