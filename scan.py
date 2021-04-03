@@ -4,20 +4,29 @@ import re
 from datetime import datetime
 from slugify import slugify
 import pytz
+import logging
 
 from flaskr import db
 from flaskr.models import Artist, Song, Played
 
+logger = logging.getLogger('rova')
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter("[%(asctime)s] %(message)s")
+
+ch = logging.StreamHandler()
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
+
 def add_record(artist_name, song_name, song_length, played_time, station):
     artist = db.session.query(Artist).filter(Artist.name == artist_name).first()
     if not artist:
-        print(f"Creating new artist record - {artist_name}")
         artist = Artist(name=artist_name, slug=slugify(artist_name))
         db.session.add(artist)
 
     song = db.session.query(Song).filter(Song.name == song_name, Song.artist_id == artist.id).first()
     if not song:
-        print(f"Creating new song record - {song_name}")
         song = Song(name=song_name, slug=slugify(song_name), artist_id=artist.id, length=song_length)
         db.session.add(song)
 
@@ -25,7 +34,7 @@ def add_record(artist_name, song_name, song_length, played_time, station):
 
     play = db.session.query(Played).filter(Played.artist_id == artist.id, Played.song_id == song.id, Played.played_time == played_time, Played.station == station).first()
     if not play:
-        print("Creating new play record")
+        logger.info(f"[{station}] {artist.name} - {song.name}")
         play = Played(artist_id=artist.id, song_id=song.id, played_time=played_time, station=station)
         db.session.add(play)
 
@@ -62,9 +71,6 @@ tz = pytz.timezone("Pacific/Auckland")
 songs = []
 
 for station, tag in rova_stations.items():
-    print("-" * 20)
-    print(station)
-
     try:
         req = requests.get(rova_base_url.format(station=tag))
         j = json.loads(req.content.decode("utf-8"))
@@ -81,9 +87,6 @@ for station, tag in rova_stations.items():
         pass
 
 for station, tag in iheart_stations.items():
-    print("-" * 20)
-    print(station)
-
     try:
         req = requests.get(iheart_base_url.format(station=tag))
         j = json.loads(req.content.decode("utf-8"))
