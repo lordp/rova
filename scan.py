@@ -94,7 +94,6 @@ for station, tag in iheart_stations.items():
         song_name = j["title"]
         artist_name = j["artist"]
         played_time = datetime.fromtimestamp(j['startTime'] / 1000)
-        played_time = tz.localize(played_time)
         length = j["trackDuration"]
 
         songs.append({'artist': artist_name, 'name': song_name, 'length': length, 'time': played_time, 'station': station})
