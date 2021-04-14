@@ -79,7 +79,8 @@ def stations():
             'thehits': 'The Hits',
             'lifefm': 'Life FM',
             'southernstar': 'Southern Star',
-            'rhema': 'Radio Rhema'
+            'rhema': 'Radio Rhema',
+            'kick': 'Kick'
         }
     }
 

@@ -63,6 +63,7 @@ iheart_stations = {
     "lifefm": 6938,
     "southernstar": 6939,
     "rhema": 6937,
+    "kick": 8868
 }
 
 pattern = r" ?(\*|\+|\^|NM)$"

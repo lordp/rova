@@ -78,7 +78,8 @@ urls = {
     'thehits': 'The Hits',
     'lifefm': 'Life FM',
     'southernstar': 'Southern Star',
-    'rhema': 'Radio Rhema'
+    'rhema': 'Radio Rhema',
+    'kick': 'Kick'
 }
 
 if len(sys.argv) > 1:
