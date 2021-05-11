@@ -10,6 +10,7 @@ import math
 import json
 import re
 from datetime import datetime, timedelta
+import string
 
 
 def find_start_date():
@@ -125,6 +126,72 @@ def artist(name):
         recent_songs=recent_songs,
         song_play_count=song_play_count,
         station_play_count=station_play_count,
+        station_list=stations()
+    )
+
+
+@app.route("/artists")
+def artists():
+    artists = db.session.query(Artist).distinct().order_by(Artist.slug.asc())
+
+    startswith = "ALL"
+    if 'startswith' in request.args:
+        startswith = request.args.get('startswith', type=str)
+        artists = artists.filter(Artist.slug.ilike(f"{startswith}%"))
+
+    page = request.args.get('page', 1, type=int)
+    artists = artists.paginate(page, per_page=15)
+
+    if 'startswith' in request.args:
+        next_url = url_for('artists', page=artists.next_num, startswith=startswith) if artists.has_next else None
+        prev_url = url_for('artists', page=artists.prev_num, startswith=startswith) if artists.has_prev else None
+    else:
+        next_url = url_for('artists', page=artists.next_num) if artists.has_next else None
+        prev_url = url_for('artists', page=artists.prev_num) if artists.has_prev else None
+
+    return render_template(
+        'stats/artists.html',
+        artists=artists.items,
+        next_url=next_url,
+        prev_url=prev_url,
+        page=page,
+        next_page=page + 1,
+        prev_page=page - 1,
+        alphabet=list(string.ascii_uppercase),
+        startswith=startswith,
+        station_list=stations()
+    )
+
+
+@app.route("/songs")
+def songs():
+    songs = db.session.query(Song).distinct().order_by(Song.slug.asc())
+
+    startswith = "ALL"
+    if 'startswith' in request.args:
+        startswith = request.args.get('startswith', type=str)
+        songs = songs.filter(Song.slug.ilike(f"{startswith}%"))
+
+    page = request.args.get('page', 1, type=int)
+    songs = songs.paginate(page, per_page=15)
+
+    if 'startswith' in request.args:
+        next_url = url_for('songs', page=songs.next_num, startswith=startswith) if songs.has_next else None
+        prev_url = url_for('songs', page=songs.prev_num, startswith=startswith) if songs.has_prev else None
+    else:
+        next_url = url_for('songs', page=songs.next_num) if songs.has_next else None
+        prev_url = url_for('songs', page=songs.prev_num) if songs.has_prev else None
+
+    return render_template(
+        'stats/songs.html',
+        songs=songs.items,
+        next_url=next_url,
+        prev_url=prev_url,
+        page=page,
+        next_page=page + 1,
+        prev_page=page - 1,
+        alphabet=list(string.ascii_uppercase),
+        startswith=startswith,
         station_list=stations()
     )
 
