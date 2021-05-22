@@ -83,6 +83,12 @@
                     {% endfor %}
                     </div>
                   </li>
+                  <li class="nav-item">
+                    <a href="/artists" class="nav-link{% if request.path.startswith('/artists') %} active{% endif %}">All Artists</a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/songs" class="nav-link{% if request.path.startswith('/songs') %} active{% endif %}">All Songs</a>
+                  </li>
                 </ul>
               </div>
             </div>
