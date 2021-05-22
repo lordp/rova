@@ -132,7 +132,7 @@ def artist(name):
 
 @app.route("/artists")
 def artists():
-    artists = db.session.query(Artist).distinct().order_by(Artist.slug.asc())
+    artists = db.session.query(Artist, db.func.count(Song.id)).join(Song).group_by(Artist.id).order_by(Artist.slug.asc())
 
     startswith = "ALL"
     if 'startswith' in request.args:
