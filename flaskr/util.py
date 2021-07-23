@@ -60,14 +60,28 @@ def parse_time(span):
 
 def stations():
     return {
-        'breeze': 'The Breeze',
-        'rock': 'The Rock',
-        'sound': 'The Sound',
-        'mai': 'Mai FM',
-        'more': 'More FM',
-        'george': 'George FM',
-        'magic': 'Magic Music',
-        'edge': 'The Edge'
+        'rova': {
+            'breeze': 'The Breeze',
+            'rock': 'The Rock',
+            'sound': 'The Sound',
+            'mai': 'Mai FM',
+            'more': 'More FM',
+            'george': 'George FM',
+            'magic': 'Magic Music',
+            'edge': 'The Edge'
+        },
+        'iheart': {
+            'zm': 'ZM',
+            'hauraki': 'Radio Hauraki',
+            'nztop40': 'NZ Top 40',
+            'flava': 'Flava',
+            'coast': 'Coast',
+            'thehits': 'The Hits',
+            'lifefm': 'Life FM',
+            'southernstar': 'Southern Star',
+            'rhema': 'Radio Rhema',
+            'kick': 'Kick'
+        }
     }
 
 

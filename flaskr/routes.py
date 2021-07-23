@@ -4,12 +4,13 @@ from flaskr.util import parse_time, stations, tz
 
 from flask import render_template, request, url_for, Response, abort, redirect
 
-from sqlalchemy.sql.expression import desc
+from sqlalchemy.sql.expression import desc, and_
 
 import math
 import json
 import re
 from datetime import datetime, timedelta
+import string
 
 
 def find_start_date():
@@ -19,21 +20,23 @@ def find_start_date():
 
 @app.route("/")
 def index():
-    recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).order_by(Played.played_time.desc()).limit(15).distinct()
-
-    total_plays = db.session.query(Played).count()
-    unique_songs = db.session.query(Song.name).join(Played).distinct().count()
-    unique_artists = db.session.query(Artist).distinct().count()
-
     last_day_span = parse_time("24hours")
     last_week_span = parse_time("7days")
     last_month_span = parse_time("30days")
+
+    recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).order_by(Played.played_time.desc()).\
+        filter(and_(Played.played_time >= last_day_span[0], Played.played_time <= last_day_span[1])).limit(15).distinct()
+
+    total_plays = db.session.query(Played).count()
+    unique_songs = db.session.query(Song.name).distinct().count()
+    unique_artists = db.session.query(Artist).distinct().count()
 
     last_day = db.session.query(Played).filter(Played.played_time >= last_day_span[0], Played.played_time < last_day_span[1]).count()
     last_week = db.session.query(Played).filter(Played.played_time >= last_week_span[0], Played.played_time < last_week_span[1]).count()
     last_month = db.session.query(Played).filter(Played.played_time >= last_month_span[0], Played.played_time < last_month_span[1]).count()
 
-    hourly_plays_query = db.session.query(db.func.date_part('HOUR', Played.played_time).label("hour"), db.func.count()).group_by("hour").order_by("hour").all()
+    hourly_plays_query = db.session.query(db.func.date_part('HOUR', Played.played_time).label("hour"), db.func.count()).\
+        filter(and_(Played.played_time >= last_day_span[0], Played.played_time <= last_day_span[1])).group_by("hour").order_by("hour").all()
     hourly_plays = {hour:0 for hour in range(24)}
     for entry in hourly_plays_query:
         hourly_plays[entry[0]] = entry[1]
@@ -69,14 +72,15 @@ def artist(name):
     if not artist:
         abort(404, "We're sorry, that artist cannot be found.")
 
-    recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).filter(Played.artist_id == artist.id).order_by(Played.played_time.desc()).limit(15)
-
-    total_plays = db.session.query(Played).join(Artist).filter(Played.artist_id == artist.id).count()
-    unique_songs = db.session.query(Song.name).join(Played, Artist).filter(Song.artist_id == artist.id).distinct().count()
-
     last_day_span = parse_time("24hours")
     last_week_span = parse_time("7days")
     last_month_span = parse_time("30days")
+
+    recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).filter(Played.artist_id == artist.id).\
+        filter(and_(Played.played_time >= last_day_span[0], Played.played_time <= last_day_span[1])).order_by(Played.played_time.desc()).limit(15)
+
+    total_plays = db.session.query(Played).join(Artist).filter(Played.artist_id == artist.id).count()
+    unique_songs = db.session.query(Song.name).join(Played, Artist).filter(Song.artist_id == artist.id).distinct().count()
 
     last_day = db.session.query(Played).join(Artist).filter(Played.artist_id == artist.id, Played.played_time >= last_day_span[0], Played.played_time < last_day_span[1]).count()
     last_week = db.session.query(Played).join(Artist).filter(Played.artist_id == artist.id, Played.played_time >= last_week_span[0], Played.played_time < last_week_span[1]).count()
@@ -126,23 +130,90 @@ def artist(name):
     )
 
 
+@app.route("/artists")
+def artists():
+    artists = db.session.query(Artist, db.func.count(Song.id)).join(Song).group_by(Artist.id).order_by(Artist.slug.asc())
+
+    startswith = "ALL"
+    if 'startswith' in request.args:
+        startswith = request.args.get('startswith', type=str)
+        artists = artists.filter(Artist.slug.ilike(f"{startswith}%"))
+
+    page = request.args.get('page', 1, type=int)
+    artists = artists.paginate(page, per_page=15)
+
+    if 'startswith' in request.args:
+        next_url = url_for('artists', page=artists.next_num, startswith=startswith) if artists.has_next else None
+        prev_url = url_for('artists', page=artists.prev_num, startswith=startswith) if artists.has_prev else None
+    else:
+        next_url = url_for('artists', page=artists.next_num) if artists.has_next else None
+        prev_url = url_for('artists', page=artists.prev_num) if artists.has_prev else None
+
+    return render_template(
+        'stats/artists.html',
+        artists=artists.items,
+        next_url=next_url,
+        prev_url=prev_url,
+        page=page,
+        next_page=page + 1,
+        prev_page=page - 1,
+        alphabet=list(string.ascii_uppercase),
+        startswith=startswith,
+        station_list=stations()
+    )
+
+
+@app.route("/songs")
+def songs():
+    songs = db.session.query(Song).distinct().order_by(Song.slug.asc())
+
+    startswith = "ALL"
+    if 'startswith' in request.args:
+        startswith = request.args.get('startswith', type=str)
+        songs = songs.filter(Song.slug.ilike(f"{startswith}%"))
+
+    page = request.args.get('page', 1, type=int)
+    songs = songs.paginate(page, per_page=15)
+
+    if 'startswith' in request.args:
+        next_url = url_for('songs', page=songs.next_num, startswith=startswith) if songs.has_next else None
+        prev_url = url_for('songs', page=songs.prev_num, startswith=startswith) if songs.has_prev else None
+    else:
+        next_url = url_for('songs', page=songs.next_num) if songs.has_next else None
+        prev_url = url_for('songs', page=songs.prev_num) if songs.has_prev else None
+
+    return render_template(
+        'stats/songs.html',
+        songs=songs.items,
+        next_url=next_url,
+        prev_url=prev_url,
+        page=page,
+        next_page=page + 1,
+        prev_page=page - 1,
+        alphabet=list(string.ascii_uppercase),
+        startswith=startswith,
+        station_list=stations()
+    )
+
+
 @app.route("/station/<slug:name>")
 def station(name):
     station_list = stations()
-    if name not in station_list:
+    if name not in station_list['rova'] and name not in station_list['iheart']:
         abort(404, "We're sorry, that station cannot be found.")
+
+    last_day_span = parse_time("24hours")
+    last_week_span = parse_time("7days")
+    last_month_span = parse_time("30days")
 
     recent_songs = db.session.query(Played).join(Song).join(Artist, Artist.id == Played.artist_id).\
         filter(Played.station == name).\
+        filter(and_(Played.played_time >= last_day_span[0], Played.played_time <= last_day_span[1])).\
         order_by(Played.played_time.desc())[:15]
 
     total_plays = db.session.query(Played).filter(Played.station == name).count()
     unique_songs = db.session.query(Song).join(Played).filter(Played.station == name).distinct().count()
     unique_artists = db.session.query(Artist).join(Played).filter(Played.station == name).distinct().count()
-
-    last_day_span = parse_time("24hours")
-    last_week_span = parse_time("7days")
-    last_month_span = parse_time("30days")
 
     last_day = db.session.query(Played).filter(Played.played_time >= last_day_span[0], Played.played_time < last_day_span[1], Played.station == name).count()
     last_week = db.session.query(Played).filter(Played.played_time >= last_week_span[0], Played.played_time < last_week_span[1], Played.station == name).count()
@@ -234,8 +305,13 @@ def song(name, artist=None):
     else:
         artists = db.session.query(Artist).join(Song).filter(Song.slug == name).distinct().all()
 
+    last_day_span = parse_time("24hours")
+    last_week_span = parse_time("7days")
+    last_month_span = parse_time("30days")
+
     recent_plays = db.session.query(Played).join(Song).\
         filter(Song.slug == name).\
+        filter(and_(Played.played_time >= last_day_span[0], Played.played_time <= last_day_span[1])).\
         order_by(Played.played_time.desc())
 
     station_stats = db.session.query(Played.station, db.func.count(Played.station).label("cnt")).\
@@ -245,10 +321,6 @@ def song(name, artist=None):
         order_by(desc("cnt"))
 
     total_plays = db.session.query(Played).join(Song).filter(Song.slug == name)
-
-    last_day_span = parse_time("24hours")
-    last_week_span = parse_time("7days")
-    last_month_span = parse_time("30days")
 
     last_day = db.session.query(Played).join(Song).filter(Played.played_time >= last_day_span[0], Played.played_time < last_day_span[1], Song.slug == name)
     last_week = db.session.query(Played).join(Song).filter(Played.played_time >= last_week_span[0], Played.played_time < last_week_span[1], Song.slug == name)
@@ -334,6 +406,7 @@ def chart(year=None, month=None, day=None, station=None):
         chart=chart,
         year=year,
         week=week,
+        full_date=date.strftime("%a, %b %d, %Y"),
         station=station,
         station_list=stations()
     )

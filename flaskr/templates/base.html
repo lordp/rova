@@ -73,11 +73,32 @@
                   <li class="nav-item">
                     <a href="/chart/" class="nav-link{% if request.path.startswith('/chart') %} active{% endif %}">Charts</a>
                   </li>
-                  {% for tag, name in station_list.items() %}
-                  <li class="nav-item">
-                    <a href="{{ url_for('station', name=tag) }}" class="nav-link{% if request.path == '/station/' + tag %} active{% endif %}">{{ name }}</a>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="rova-dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Rova
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="rova-dropdown">
+                    {% for tag, name in station_list.rova.items() %}
+                      <a href="{{ url_for('station', name=tag) }}" class="dropdown-item">{{ name }}</a>
+                    {% endfor %}
+                    </div>
                   </li>
-                  {% endfor %}
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="iheart-dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      iHeartRadio
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="iheart-dropdown">
+                    {% for tag, name in station_list.iheart.items() %}
+                      <a href="{{ url_for('station', name=tag) }}" class="dropdown-item">{{ name }}</a>
+                    {% endfor %}
+                    </div>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/artists" class="nav-link{% if request.path.startswith('/artists') %} active{% endif %}">All Artists</a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/songs" class="nav-link{% if request.path.startswith('/songs') %} active{% endif %}">All Songs</a>
+                  </li>
                 </ul>
               </div>
             </div>

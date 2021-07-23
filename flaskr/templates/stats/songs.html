@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="my-3 my-md-5">
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">
+        All Songs
+      </h1>
+    </div>
+    <div class="row row-cards row-deck">
+      <div class="col-12">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center flex-wrap">
+            <li class="page-item{% if startswith == 'ALL' %} active{% endif %}"><a class="page-link" href="{{ url_for('songs') }}">ALL</a></li>
+            {% for letter in alphabet %}
+            <li class="page-item"><a class="page-link" href="{{ url_for('songs', startswith=letter) }}">{{ letter }}</a></li>
+            {% endfor %}
+          </ul>
+          <ul class="pagination justify-content-center">
+              <li class="page-item{% if not prev_url %} disabled{% endif %}"><a class="page-link" href="{{ prev_url }}">Previous</a></li>
+              {% if prev_url %}
+              <li class="page-item"><a class="page-link" href="{{ prev_url }}">{{ prev_page }}</a></li>
+              {% endif %}
+              <li class="page-item active"><span class="page-link">{{ page }}<span class="sr-only">(current)</span></span></li>
+              {% if next_url %}
+              <li class="page-item"><a class="page-link" href="{{ next_url }}">{{ next_page }}</a></li>
+              {% endif %}
+              <li class="page-item{% if not next_url %} disabled{% endif %}"><a class="page-link" href="{{ next_url }}">Next</a></li>
+          </ul>
+        </nav>
+        <div class="card">
+          <div class="table-responsive">
+            <table class="table table-hover table-outline table-vcenter text-nowrap card-table">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Artist</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in songs %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('song', name=row.slug) }}">{{ row.name }}</a>
+                  </td>
+                  <td>
+                    <a href="{{ url_for('artist', name=row.artist.slug) }}">{{ row.artist.name }}</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center">
+              <li class="page-item{% if not prev_url %} disabled{% endif %}"><a class="page-link" href="{{ prev_url }}">Previous</a></li>
+              {% if prev_url %}
+              <li class="page-item"><a class="page-link" href="{{ prev_url }}">{{ prev_page }}</a></li>
+              {% endif %}
+              <li class="page-item active"><span class="page-link">{{ page }}<span class="sr-only">(current)</span></span></li>
+              {% if next_url %}
+              <li class="page-item"><a class="page-link" href="{{ next_url }}">{{ next_page }}</a></li>
+              {% endif %}
+              <li class="page-item{% if not next_url %} disabled{% endif %}"><a class="page-link" href="{{ next_url }}">Next</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
