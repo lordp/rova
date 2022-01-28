@@ -13,18 +13,15 @@ from jinja2 import Markup
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
-with open('sentry.dsn', 'rb') as infile:
+with open("sentry.dsn", "rb") as infile:
     sentry_dsn = infile.read().decode("utf-8")
 
-sentry_sdk.init(
-    dsn=sentry_dsn,
-    integrations=[FlaskIntegration()]
-)
+#sentry_sdk.init(dsn=sentry_dsn, integrations=[FlaskIntegration()])
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-app.url_map.converters['slug'] = SlugConverter
+app.url_map.converters["slug"] = SlugConverter
 app.register_error_handler(404, page_not_found)
 
 db = SQLAlchemy(app)
@@ -39,10 +36,10 @@ import pytz
 
 @app.template_filter()
 def station_name(name):
-    if name in stations()['rova']:
-        return stations()['rova'][name]
-    elif name in stations()['iheart']:
-        return stations()['iheart'][name]
+    if name in stations()["rova"]:
+        return stations()["rova"][name]
+    elif name in stations()["iheart"]:
+        return stations()["iheart"][name]
     else:
         return name
 
@@ -50,13 +47,13 @@ def station_name(name):
 @app.template_filter()
 def weekday(dow):
     days = {
-        '0': 'Sunday',
-        '1': 'Monday',
-        '2': 'Tuesday',
-        '3': 'Wednesday',
-        '4': 'Thursday',
-        '5': 'Friday',
-        '6': 'Saturday',
+        "0": "Sunday",
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday",
     }
 
     return days.get(dow)
@@ -64,7 +61,7 @@ def weekday(dow):
 
 @app.template_filter()
 def delta(value):
-    diff = datetime.now().astimezone(tz()) - tz().localize(value)
+    diff = datetime.now().astimezone(tz()) - value
     return f"{format_time(diff.total_seconds())} ago"
 
 
@@ -99,4 +96,4 @@ def change_colour(change):
         change = f"+{change}"
         change_class = "chart-pos-change"
 
-    return Markup(f"<span class=\"{change_class}\">{change}</span>")
+    return Markup(f'<span class="{change_class}">{change}</span>')
